@@ -1,44 +1,77 @@
-from flask import Flask, jsonify, request
-import pandas as pd
 import os
+from flask import Flask, jsonify, request, abort
+import pandas as pd
 
 app = Flask(__name__)
 
-# Caminho seguro para o CSV
+# Caminho absoluto do CSV
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE_DIR, '../data/books.csv')
 
-# Carrega o CSV
-books_df = pd.read_csv(CSV_PATH)
-books = books_df.to_dict(orient='records')
+# Carregar CSV
+try:
+    books_df = pd.read_csv(CSV_PATH)
+except FileNotFoundError:
+    print(f"Arquivo CSV não encontrado em {CSV_PATH}")
+    books_df = pd.DataFrame()
 
-@app.route('/api/v1/health', methods=['GET'])
-def health():
-    return jsonify({"status": "ok", "total_books": len(books)})
+# Adicionar ID se não existir
+if 'id' not in books_df.columns:
+    books_df.insert(0, 'id', range(1, len(books_df) + 1))
 
-@app.route('/api/v1/books', methods=['GET'])
-def list_books():
-    return jsonify(books)
+# ===== Rota raiz =====
+@app.route("/")
+def index():
+    return {
+        "message": "API Books Tech Challenge is running!",
+        "endpoints": {
+            "/api/v1/books": "List all books",
+            "/api/v1/books/<id>": "Get book details by ID",
+            "/api/v1/books/search": "Search books by title and/or category",
+            "/api/v1/categories": "List all categories",
+            "/api/v1/health": "API health check"
+        }
+    }
 
-@app.route('/api/v1/books/<int:book_id>', methods=['GET'])
+# ===== Listar todos os livros =====
+@app.route("/api/v1/books", methods=["GET"])
+def get_books():
+    return jsonify(books_df.to_dict(orient="records"))
+
+# ===== Detalhe de um livro =====
+@app.route("/api/v1/books/<int:book_id>", methods=["GET"])
 def get_book(book_id):
-    if 0 <= book_id < len(books):
-        return jsonify(books[book_id])
-    else:
-        return jsonify({"error": "Book not found"}), 404
+    book = books_df[books_df['id'] == book_id]
+    if book.empty:
+        abort(404, description="Book not found")
+    return jsonify(book.to_dict(orient="records")[0])
 
-@app.route('/api/v1/books/search', methods=['GET'])
+# ===== Buscar livros =====
+@app.route("/api/v1/books/search", methods=["GET"])
 def search_books():
-    title = request.args.get('title', '').lower()
-    category = request.args.get('category', '').lower()
-    results = [b for b in books if title in b['title'].lower() and category in b['category'].lower()]
-    return jsonify(results)
+    title = request.args.get("title", "").lower()
+    category = request.args.get("category", "").lower()
+    
+    filtered = books_df
+    if title:
+        filtered = filtered[filtered['title'].str.lower().str.contains(title)]
+    if category:
+        filtered = filtered[filtered['category'].str.lower().str.contains(category)]
+    
+    return jsonify(filtered.to_dict(orient="records"))
 
-@app.route('/api/v1/categories', methods=['GET'])
-def list_categories():
-    categories = sorted(list(set(b['category'] for b in books)))
+# ===== Listar categorias =====
+@app.route("/api/v1/categories", methods=["GET"])
+def get_categories():
+    categories = books_df['category'].dropna().unique().tolist()
     return jsonify(categories)
 
+# ===== Health check =====
+@app.route("/api/v1/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "books_count": len(books_df)})
+
+# ===== Rodar no Heroku =====
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
