@@ -1,1 +1,1 @@
-web: gunicorn api.app:appgit add Procfile
+web: gunicorn api.app:app
