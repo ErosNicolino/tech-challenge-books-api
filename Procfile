@@ -1,1 +1,1 @@
-web: gunicorn -k uvicorn.workers.UvicornWorker api.app:app
+web: gunicorn api.app:appgit add Procfile
