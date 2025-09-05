@@ -96,7 +96,7 @@ GET /
 GET /api/v1/books
 ```
 Exemplo:  
-[https://tech-challenge-books-api-162d6be10e8a.herokuapp.com/api/v1/books](https://tech-challenge-books-api-162d6be10e8a.herokuapp.com/api/v1/books)
+[https://tech-challenger-fiap-a3208a7afd55.herokuapp.com/api/v1/books](https://tech-challenger-fiap-a3208a7afd55.herokuapp.com/api/v1/books)
 
 ---
 
@@ -165,7 +165,7 @@ pytest
 ## Deploy Público
 
 A API está disponível no Heroku:  
-🔗 [https://tech-challenge-books-api-162d6be10e8a.herokuapp.com](https://tech-challenge-books-api-162d6be10e8a.herokuapp.com)
+🔗 [https://tech-challenger-fiap-a3208a7afd55.herokuapp.com](https://tech-challenger-fiap-a3208a7afd55.herokuapp.com)
 
 ---
 
