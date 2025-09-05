@@ -1,1 +1,1 @@
-web: python api/app.pyheroku create nome-da-sua-api
+web: gunicorn -k uvicorn.workers.UvicornWorker api.app:app
