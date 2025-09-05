@@ -18,6 +18,10 @@ tech-challenge-books-api/
 │
 ├── api/
 │   └── app.py              # API Flask
+├── templates/
+│   └── index.html          # Página Inicial
+├── static/
+│   └── style.css           # CSS da interface
 ├── scripts/
 │   └── scrape_books.py     # Web scraping para gerar CSV
 ├── data/
