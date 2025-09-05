@@ -1,1 +1,1 @@
-web: python api/app.py
+web: python api/app.pyheroku create nome-da-sua-api
