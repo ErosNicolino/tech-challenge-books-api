@@ -1,8 +1,13 @@
 import os
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, render_template
 import pandas as pd
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="../templates", static_folder="../static")
+
+# ===== Rota raiz (HTML) =====
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 # Caminho absoluto do CSV
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,9 +24,9 @@ except FileNotFoundError:
 if 'id' not in books_df.columns:
     books_df.insert(0, 'id', range(1, len(books_df) + 1))
 
-# ===== Rota raiz =====
-@app.route("/")
-def index():
+# ===== Endpoint de info da API =====
+@app.route("/api/v1", methods=["GET"])
+def api_info():
     return {
         "message": "API Books Tech Challenge is running!",
         "endpoints": {

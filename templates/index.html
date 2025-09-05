@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Books Tech Challenge</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>API Books Tech Challenge</h1>
+        <p>Bem-vindo(a)! Acesse os endpoints da API abaixo:</p>
+
+        <h2>Endpoints</h2>
+        <ul class="endpoints">
+            <li><a href="/api/v1/books">/api/v1/books</a> - Lista todos os livros</li>
+            <li><a href="/api/v1/books/1">/api/v1/books/&lt;id&gt;</a> - Detalhes de um livro</li>
+            <li><a href="/api/v1/books/search?title=&lt;título&gt;&category=&lt;categoria&gt;">/api/v1/books/search</a> - Buscar livros por título e/ou categoria</li>
+            <li><a href="/api/v1/categories">/api/v1/categories</a> - Lista todas as categorias</li>
+            <li><a href="/api/v1/health">/api/v1/health</a> - Health check da API</li>
+        </ul>
+
+        <h2>Sobre</h2>
+        <p>Esta API é parte do Tech Challenge e fornece dados de livros extraídos do site 
+        <a href="https://books.toscrape.com/" target="_blank">Books to Scrape</a>. 
+        Pode ser utilizada para aplicações de ciência de dados, recomendações de livros ou consumo geral de dados.</p>
+
+        <h2>Atualização de dados</h2>
+        <p>Para atualizar os dados, execute o script de scraping:</p>
+        <code>python scripts/scrape_books.py</code>
+        <p>Depois, reinicie a API ou faça push para o Heroku.</p>
+
+        <footer>
+            Tech Challenge - API Books &copy; 2025
+        </footer>
+    </div>
+</body>
+</html>
