@@ -24,11 +24,20 @@ tech-challenge-books-api/
 │   └── style.css           # Arquivos estáticos da interface
 ├── templates/
 │   └── index.html          # Página inicial da API
+├── docs/
+│   └── diagrama-visual.png # Diagrama do pipeline e arquitetura
 ├── tests/                  # Testes unitários (opcional)
 ├── requirements.txt        # Dependências do projeto
-├── Procfile                # Configuração para deploy no Render
 └── README.md               # Documentação do projeto
 ```
+
+---
+
+## Diagrama do Pipeline
+
+O diagrama abaixo mostra o fluxo completo do projeto, desde a extração dos dados até o consumo pela API e possíveis modelos de Machine Learning:
+
+![Diagrama do Pipeline](./docs/diagrama-visual.png)
 
 ---
 
@@ -101,8 +110,6 @@ GET /
 
 Retorna a página inicial da API.
 
----
-
 ### 2. Informações gerais da API
 
 ```http
@@ -124,8 +131,6 @@ GET /api/v1
 }
 ```
 
----
-
 ### 3. Listar todos os livros
 
 ```http
@@ -133,8 +138,6 @@ GET /api/v1/books
 ```
 
 Retorna todos os livros da base de dados.
-
----
 
 ### 4. Detalhes de um livro
 
@@ -144,8 +147,6 @@ GET /api/v1/books/<id>
 
 Retorna os detalhes de um livro específico pelo ID.
 
----
-
 ### 5. Buscar livros
 
 ```http
@@ -154,8 +155,6 @@ GET /api/v1/books/search?title=<title>&category=<category>
 
 Permite buscar livros por título e/ou categoria.
 
----
-
 ### 6. Listar categorias
 
 ```http
@@ -163,8 +162,6 @@ GET /api/v1/categories
 ```
 
 Retorna todas as categorias de livros disponíveis.
-
----
 
 ### 7. Health Check
 
