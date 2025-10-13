@@ -137,7 +137,41 @@ GET /api/v1
 GET /api/v1/books
 ```
 
-Retorna todos os livros da base de dados.
+**Query Params:**
+
+* `page` (opcional): número da página para paginação
+* `limit` (opcional): quantidade de livros por página
+
+**Exemplo de Request:**
+
+```bash
+curl -X GET "https://tech-challenge-books-api-mkqn.onrender.com/api/v1/books?page=1&limit=5"
+```
+
+**Exemplo de Response:**
+
+```json
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "A Light in the Attic",
+      "price": "51.77",
+      "rating": "Three",
+      "availability": "In stock",
+      "category": "Poetry",
+      "image_url": "http://books.toscrape.com/media/cache/xx.jpg"
+    }
+  ],
+  "page": 1,
+  "total_pages": 50
+}
+```
+
+**Status Codes:**
+
+* 200: sucesso
+* 400: parâmetros inválidos
 
 ### 4. Detalhes de um livro
 
@@ -145,7 +179,35 @@ Retorna todos os livros da base de dados.
 GET /api/v1/books/<id>
 ```
 
-Retorna os detalhes de um livro específico pelo ID.
+**Path Params:**
+
+* `id` (obrigatório): ID do livro
+
+**Exemplo de Request:**
+
+```bash
+curl -X GET "https://tech-challenge-books-api-mkqn.onrender.com/api/v1/books/1"
+```
+
+**Exemplo de Response:**
+
+```json
+{
+  "id": 1,
+  "title": "A Light in the Attic",
+  "price": "51.77",
+  "rating": "Three",
+  "availability": "In stock",
+  "category": "Poetry",
+  "description": "A collection of poetry and illustrations.",
+  "image_url": "http://books.toscrape.com/media/cache/xx.jpg"
+}
+```
+
+**Status Codes:**
+
+* 200: sucesso
+* 404: livro não encontrado
 
 ### 5. Buscar livros
 
@@ -153,7 +215,37 @@ Retorna os detalhes de um livro específico pelo ID.
 GET /api/v1/books/search?title=<title>&category=<category>
 ```
 
-Permite buscar livros por título e/ou categoria.
+**Query Params:**
+
+* `title` (opcional): título parcial do livro
+* `category` (opcional): categoria do livro
+
+**Exemplo de Request:**
+
+```bash
+curl -X GET "https://tech-challenge-books-api-mkqn.onrender.com/api/v1/books/search?title=velvet&category=Historical%20Fiction"
+```
+
+**Exemplo de Response:**
+
+```json
+[
+  {
+    "id": 2,
+    "title": "Tipping the Velvet",
+    "price": "53.74",
+    "rating": "One",
+    "availability": "In stock",
+    "category": "Historical Fiction",
+    "image_url": "http://books.toscrape.com/media/cache/yy.jpg"
+  }
+]
+```
+
+**Status Codes:**
+
+* 200: sucesso
+* 404: nenhum livro encontrado
 
 ### 6. Listar categorias
 
@@ -161,7 +253,20 @@ Permite buscar livros por título e/ou categoria.
 GET /api/v1/categories
 ```
 
-Retorna todas as categorias de livros disponíveis.
+**Exemplo de Response:**
+
+```json
+[
+  "Poetry",
+  "Historical Fiction",
+  "Science",
+  "Travel"
+]
+```
+
+**Status Codes:**
+
+* 200: sucesso
 
 ### 7. Health Check
 
@@ -169,9 +274,7 @@ Retorna todas as categorias de livros disponíveis.
 GET /api/v1/health
 ```
 
-Verifica o status da API e retorna a quantidade total de livros.
-
-**Response:**
+**Exemplo de Response:**
 
 ```json
 {
@@ -179,6 +282,11 @@ Verifica o status da API e retorna a quantidade total de livros.
   "books_count": 1000
 }
 ```
+
+**Status Codes:**
+
+* 200: API funcionando
+* 500: erro interno da API
 
 ---
 
