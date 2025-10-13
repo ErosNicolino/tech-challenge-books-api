@@ -52,12 +52,6 @@ logging.basicConfig(
 )
 logging.info("API iniciada com sucesso.")
 
-# ===== Página inicial =====
-@app.route("/")
-def home():
-    logging.info("Rota '/' acessada.")
-    return render_template("index.html")
-
 # ===== Carregamento do CSV =====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE_DIR, '../data/books.csv')
@@ -77,9 +71,51 @@ if 'id' not in books_df.columns:
 # ===== Usuários de teste =====
 USERS = {"admin": "password123"}
 
-# ===== Rota de login =====
+# ===== Página inicial =====
+@app.route("/")
+def home():
+    """Página inicial"""
+    logging.info("Rota '/' acessada.")
+    return render_template("index.html")
+
+# ===== Auth Endpoints =====
 @app.route("/api/v1/auth/login", methods=["POST"])
 def login():
+    """
+    Login e obtenção de token JWT
+    ---
+    tags:
+      - Auth
+    parameters:
+      - in: body
+        name: credentials
+        schema:
+          type: object
+          required:
+            - username
+            - password
+          properties:
+            username:
+              type: string
+              example: admin
+            password:
+              type: string
+              example: password123
+    responses:
+      200:
+        description: Token JWT gerado
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+      400:
+        description: Username ou senha ausente
+      401:
+        description: Username ou senha inválidos
+    """
     logging.info("Rota '/api/v1/auth/login' acessada.")
     data = request.get_json()
     username = data.get("username")
@@ -98,19 +134,47 @@ def login():
     logging.info(f"Usuário '{username}' autenticado com sucesso.")
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
-# ===== Refresh JWT =====
 @app.route("/api/v1/auth/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh_token():
+    """
+    Refresh do token JWT
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Novo token de acesso gerado
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+    """
     current_user = get_jwt_identity()
     new_access_token = create_access_token(identity=current_user)
     logging.info(f"Token de acesso renovado para {current_user}.")
     return jsonify(access_token=new_access_token)
 
-# ===== Scraping Trigger protegido =====
+# ===== Scraping Trigger =====
 @app.route("/api/v1/scraping/trigger", methods=["POST"])
 @jwt_required()
 def trigger_scraping():
+    """
+    Executa scraping de livros (JWT required)
+    ---
+    tags:
+      - Admin
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Scraping concluído com sucesso
+      500:
+        description: Falha na execução do scraping
+    """
     current_user = get_jwt_identity()
     logging.info(f"Rota '/api/v1/scraping/trigger' acessada por {current_user}.")
     try:
@@ -121,14 +185,40 @@ def trigger_scraping():
         logging.error(f"Erro no scraping: {e}")
         return jsonify({"error": "Falha ao executar scraping"}), 500
 
-# ===== Endpoints Core =====
+# ===== Core Endpoints =====
 @app.route("/api/v1/books", methods=["GET"])
 def get_books():
+    """
+    Lista todos os livros
+    ---
+    tags:
+      - Books
+    responses:
+      200:
+        description: Lista de livros
+    """
     logging.info("Rota '/api/v1/books' acessada.")
     return jsonify(books_df.to_dict(orient="records"))
 
 @app.route("/api/v1/books/<int:book_id>", methods=["GET"])
 def get_book(book_id):
+    """
+    Detalhes de um livro pelo ID
+    ---
+    tags:
+      - Books
+    parameters:
+      - in: path
+        name: book_id
+        type: integer
+        required: true
+        example: 1
+    responses:
+      200:
+        description: Detalhes do livro
+      404:
+        description: Livro não encontrado
+    """
     logging.info(f"Rota '/api/v1/books/{book_id}' acessada.")
     book = books_df[books_df['id'] == book_id]
     if book.empty:
@@ -138,6 +228,26 @@ def get_book(book_id):
 
 @app.route("/api/v1/books/search", methods=["GET"])
 def search_books():
+    """
+    Buscar livros por título e/ou categoria
+    ---
+    tags:
+      - Books
+    parameters:
+      - in: query
+        name: title
+        type: string
+        required: false
+        example: velvet
+      - in: query
+        name: category
+        type: string
+        required: false
+        example: Historical Fiction
+    responses:
+      200:
+        description: Lista filtrada de livros
+    """
     title = request.args.get("title", "").lower()
     category = request.args.get("category", "").lower()
     logging.info(f"Rota '/api/v1/books/search' acessada com filtros: title={title}, category={category}")
@@ -152,18 +262,45 @@ def search_books():
 
 @app.route("/api/v1/categories", methods=["GET"])
 def get_categories():
+    """
+    Lista todas as categorias disponíveis
+    ---
+    tags:
+      - Books
+    responses:
+      200:
+        description: Lista de categorias
+    """
     logging.info("Rota '/api/v1/categories' acessada.")
     categories = books_df['category'].dropna().unique().tolist()
     return jsonify(categories)
 
 @app.route("/api/v1/health", methods=["GET"])
 def health():
+    """
+    Health check da API
+    ---
+    tags:
+      - Core
+    responses:
+      200:
+        description: Status da API
+    """
     logging.info("Rota '/api/v1/health' acessada.")
     return jsonify({"status": "ok", "books_count": len(books_df)})
 
-# ===== Endpoints Insights =====
+# ===== Insights Endpoints =====
 @app.route('/api/v1/stats/overview', methods=['GET'])
 def stats_overview():
+    """
+    Estatísticas gerais da coleção
+    ---
+    tags:
+      - Stats
+    responses:
+      200:
+        description: Estatísticas gerais
+    """
     logging.info("Rota '/api/v1/stats/overview' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
@@ -179,6 +316,15 @@ def stats_overview():
 
 @app.route('/api/v1/stats/categories', methods=['GET'])
 def stats_categories():
+    """
+    Estatísticas por categoria
+    ---
+    tags:
+      - Stats
+    responses:
+      200:
+        description: Estatísticas detalhadas por categoria
+    """
     logging.info("Rota '/api/v1/stats/categories' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
@@ -193,6 +339,15 @@ def stats_categories():
 
 @app.route('/api/v1/books/top-rated', methods=['GET'])
 def top_rated_books():
+    """
+    Top 10 livros por rating
+    ---
+    tags:
+      - Stats
+    responses:
+      200:
+        description: Lista dos 10 livros com melhor avaliação
+    """
     logging.info("Rota '/api/v1/books/top-rated' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
@@ -204,6 +359,26 @@ def top_rated_books():
 
 @app.route('/api/v1/books/price-range', methods=['GET'])
 def books_price_range():
+    """
+    Filtrar livros por faixa de preço
+    ---
+    tags:
+      - Stats
+    parameters:
+      - in: query
+        name: min
+        type: number
+        required: false
+        example: 20
+      - in: query
+        name: max
+        type: number
+        required: false
+        example: 50
+    responses:
+      200:
+        description: Lista de livros filtrados
+    """
     min_price = float(request.args.get('min', 0))
     max_price = float(request.args.get('max', 1000))
     logging.info(f"Rota '/api/v1/books/price-range' acessada. Filtros: min={min_price}, max={max_price}")
@@ -215,9 +390,18 @@ def books_price_range():
     filtered = df[(df['price'] >= min_price) & (df['price'] <= max_price)]
     return jsonify(filtered.to_dict(orient='records'))
 
-# ===== Endpoints ML-ready =====
+# ===== ML-ready Endpoints =====
 @app.route('/api/v1/ml/features', methods=['GET'])
 def ml_features():
+    """
+    Features para modelos ML
+    ---
+    tags:
+      - ML
+    responses:
+      200:
+        description: Dados formatados para features
+    """
     logging.info("Rota '/api/v1/ml/features' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
@@ -231,6 +415,15 @@ def ml_features():
 
 @app.route('/api/v1/ml/training-data', methods=['GET'])
 def ml_training_data():
+    """
+    Dataset para treinamento ML
+    ---
+    tags:
+      - ML
+    responses:
+      200:
+        description: Dataset completo para treinamento
+    """
     logging.info("Rota '/api/v1/ml/training-data' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
@@ -245,11 +438,46 @@ def ml_training_data():
 @app.route('/api/v1/ml/predictions', methods=['POST'])
 @jwt_required()
 def ml_predictions():
+    """
+    Recebe predições de modelo ML (JWT required)
+    ---
+    tags:
+      - ML
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: prediction_input
+        schema:
+          type: object
+          required:
+            - price
+            - category_code
+            - rating_num
+          properties:
+            price:
+              type: number
+              example: 25.0
+            category_code:
+              type: integer
+              example: 3
+            rating_num:
+              type: integer
+              example: 4
+    responses:
+      200:
+        description: Predição gerada
+        schema:
+          type: object
+          properties:
+            predicted_price:
+              type: number
+              example: 42.0
+    """
     current_user = get_jwt_identity()
     logging.info(f"Rota '/api/v1/ml/predictions' acessada por {current_user}.")
     data = request.get_json()
-    # Placeholder: implementar modelo real futuramente
-    prediction = {"predicted_price": 42.0}
+    prediction = {"predicted_price": 42.0}  # Placeholder
     return jsonify(prediction)
 
 # ===== Execução local =====
