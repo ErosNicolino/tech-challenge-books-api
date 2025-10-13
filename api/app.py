@@ -1,8 +1,13 @@
 import os
+import logging
+import subprocess
 from flask import Flask, jsonify, request, abort, render_template
 from flasgger import Swagger
 import pandas as pd
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import (
+    JWTManager, create_access_token, create_refresh_token,
+    jwt_required, get_jwt_identity
+)
 
 # ===== Configuração base =====
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
@@ -19,9 +24,9 @@ swagger = Swagger(app, template={
         "description": "API pública para consulta de livros extraídos do site Books to Scrape.",
         "version": "1.0.0",
         "contact": {
-            "responsible": "Nicolino",
-            "email": "seuemail@exemplo.com",
-            "url": "https://github.com/seuusuario"
+            "responsible": "Eros Nicolino",
+            "email": "erosnicolino@icloud.com",
+            "url": "https://github.com/ErosNicolino"
         },
         "termsOfService": "https://books.toscrape.com/"
     },
@@ -38,10 +43,19 @@ swagger = Swagger(app, template={
     }
 })
 
+# ===== Configuração de Logs =====
+LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.log")
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logging.info("API iniciada com sucesso.")
+
 # ===== Página inicial =====
 @app.route("/")
 def home():
-    """Home page of the API"""
+    logging.info("Rota '/' acessada.")
     return render_template("index.html")
 
 # ===== Carregamento do CSV =====
@@ -51,11 +65,11 @@ CSV_PATH = os.path.join(BASE_DIR, '../data/books.csv')
 try:
     books_df = pd.read_csv(CSV_PATH, encoding='utf-8')
 except FileNotFoundError:
-    print(f"Arquivo CSV não encontrado em {CSV_PATH}")
+    logging.error(f"Arquivo CSV não encontrado em {CSV_PATH}")
     books_df = pd.DataFrame()
 
 if not books_df.empty and 'price' in books_df.columns:
-    books_df['price'] = books_df['price'].str.replace('Â£','£', regex=False)
+    books_df['price'] = books_df['price'].str.replace('Â£', '£', regex=False)
 
 if 'id' not in books_df.columns:
     books_df.insert(0, 'id', range(1, len(books_df) + 1))
@@ -66,192 +80,91 @@ USERS = {"admin": "password123"}
 # ===== Rota de login =====
 @app.route("/api/v1/auth/login", methods=["POST"])
 def login():
-    """
-    User login to get JWT token
-    ---
-    tags:
-      - Authentication
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            username:
-              type: string
-              example: admin
-            password:
-              type: string
-              example: password123
-    responses:
-      200:
-        description: JWT token returned
-        schema:
-          type: object
-          properties:
-            access_token:
-              type: string
-      401:
-        description: Invalid credentials
-    """
+    logging.info("Rota '/api/v1/auth/login' acessada.")
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
 
     if not username or not password:
+        logging.warning("Tentativa de login com campos vazios.")
         return jsonify({"msg": "Missing username or password"}), 400
 
     if USERS.get(username) != password:
+        logging.warning(f"Tentativa de login inválida: {username}")
         return jsonify({"msg": "Bad username or password"}), 401
 
     access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token)
+    refresh_token = create_refresh_token(identity=username)
+    logging.info(f"Usuário '{username}' autenticado com sucesso.")
+    return jsonify(access_token=access_token, refresh_token=refresh_token)
+
+# ===== Refresh JWT =====
+@app.route("/api/v1/auth/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh_token():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    logging.info(f"Token de acesso renovado para {current_user}.")
+    return jsonify(access_token=new_access_token)
+
+# ===== Scraping Trigger protegido =====
+@app.route("/api/v1/scraping/trigger", methods=["POST"])
+@jwt_required()
+def trigger_scraping():
+    current_user = get_jwt_identity()
+    logging.info(f"Rota '/api/v1/scraping/trigger' acessada por {current_user}.")
+    try:
+        subprocess.run(["python", "scripts/scrape_books.py"], check=True)
+        logging.info("Scraping concluído com sucesso.")
+        return jsonify({"msg": "Scraping concluído com sucesso."})
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Erro no scraping: {e}")
+        return jsonify({"error": "Falha ao executar scraping"}), 500
 
 # ===== Endpoints Core =====
 @app.route("/api/v1/books", methods=["GET"])
 def get_books():
-    """
-    List all books
-    ---
-    tags:
-      - Books
-    responses:
-      200:
-        description: List of books
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: integer
-              title:
-                type: string
-              price:
-                type: string
-              rating:
-                type: string
-              category:
-                type: string
-              availability:
-                type: string
-    """
+    logging.info("Rota '/api/v1/books' acessada.")
     return jsonify(books_df.to_dict(orient="records"))
 
 @app.route("/api/v1/books/<int:book_id>", methods=["GET"])
 def get_book(book_id):
-    """
-    Get book details by ID
-    ---
-    tags:
-      - Books
-    parameters:
-      - name: book_id
-        in: path
-        type: integer
-        required: true
-    responses:
-      200:
-        description: Book details
-        schema:
-          type: object
-          properties:
-            id: {type: integer}
-            title: {type: string}
-            price: {type: string}
-            rating: {type: string}
-            category: {type: string}
-            availability: {type: string}
-      404:
-        description: Book not found
-    """
+    logging.info(f"Rota '/api/v1/books/{book_id}' acessada.")
     book = books_df[books_df['id'] == book_id]
     if book.empty:
+        logging.warning(f"Livro com ID {book_id} não encontrado.")
         abort(404, description="Book not found")
     return jsonify(book.to_dict(orient="records")[0])
 
 @app.route("/api/v1/books/search", methods=["GET"])
 def search_books():
-    """
-    Search books by title or category
-    ---
-    tags:
-      - Books
-    parameters:
-      - name: title
-        in: query
-        type: string
-        required: false
-      - name: category
-        in: query
-        type: string
-        required: false
-    responses:
-      200:
-        description: Filtered books
-        schema:
-          type: array
-    """
     title = request.args.get("title", "").lower()
     category = request.args.get("category", "").lower()
-    
+    logging.info(f"Rota '/api/v1/books/search' acessada com filtros: title={title}, category={category}")
+
     filtered = books_df
     if title:
         filtered = filtered[filtered['title'].str.lower().str.contains(title)]
     if category:
         filtered = filtered[filtered['category'].str.lower().str.contains(category)]
-    
+
     return jsonify(filtered.to_dict(orient="records"))
 
 @app.route("/api/v1/categories", methods=["GET"])
 def get_categories():
-    """
-    List all categories
-    ---
-    tags:
-      - Categories
-    responses:
-      200:
-        description: List of categories
-        schema:
-          type: array
-          items:
-            type: string
-    """
+    logging.info("Rota '/api/v1/categories' acessada.")
     categories = books_df['category'].dropna().unique().tolist()
     return jsonify(categories)
 
 @app.route("/api/v1/health", methods=["GET"])
 def health():
-    """
-    API Health Check
-    ---
-    tags:
-      - System
-    responses:
-      200:
-        description: Status and books count
-        schema:
-          type: object
-          properties:
-            status: {type: string}
-            books_count: {type: integer}
-    """
+    logging.info("Rota '/api/v1/health' acessada.")
     return jsonify({"status": "ok", "books_count": len(books_df)})
 
 # ===== Endpoints Insights =====
 @app.route('/api/v1/stats/overview', methods=['GET'])
 def stats_overview():
-    """
-    General statistics overview
-    ---
-    tags:
-      - Statistics
-    responses:
-      200:
-        description: Overview stats
-    """
+    logging.info("Rota '/api/v1/stats/overview' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
     df = books_df.copy()
@@ -266,15 +179,7 @@ def stats_overview():
 
 @app.route('/api/v1/stats/categories', methods=['GET'])
 def stats_categories():
-    """
-    Statistics by category
-    ---
-    tags:
-      - Statistics
-    responses:
-      200:
-        description: Category stats
-    """
+    logging.info("Rota '/api/v1/stats/categories' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
     df = books_df.copy()
@@ -288,15 +193,7 @@ def stats_categories():
 
 @app.route('/api/v1/books/top-rated', methods=['GET'])
 def top_rated_books():
-    """
-    Top rated books
-    ---
-    tags:
-      - Statistics
-    responses:
-      200:
-        description: Top 10 rated books
-    """
+    logging.info("Rota '/api/v1/books/top-rated' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
     df = books_df.copy()
@@ -307,30 +204,12 @@ def top_rated_books():
 
 @app.route('/api/v1/books/price-range', methods=['GET'])
 def books_price_range():
-    """
-    Books by price range
-    ---
-    tags:
-      - Statistics
-    parameters:
-      - name: min
-        in: query
-        type: number
-        required: false
-        default: 0
-      - name: max
-        in: query
-        type: number
-        required: false
-        default: 1000
-    responses:
-      200:
-        description: Books filtered by price range
-    """
-    if books_df.empty:
-        return jsonify({"error": "No data available"}), 404
     min_price = float(request.args.get('min', 0))
     max_price = float(request.args.get('max', 1000))
+    logging.info(f"Rota '/api/v1/books/price-range' acessada. Filtros: min={min_price}, max={max_price}")
+
+    if books_df.empty:
+        return jsonify({"error": "No data available"}), 404
     df = books_df.copy()
     df['price'] = df['price'].str.replace('£','').astype(float)
     filtered = df[(df['price'] >= min_price) & (df['price'] <= max_price)]
@@ -339,15 +218,7 @@ def books_price_range():
 # ===== Endpoints ML-ready =====
 @app.route('/api/v1/ml/features', methods=['GET'])
 def ml_features():
-    """
-    ML Features
-    ---
-    tags:
-      - ML
-    responses:
-      200:
-        description: Features for ML
-    """
+    logging.info("Rota '/api/v1/ml/features' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
     df = books_df.copy()
@@ -360,15 +231,7 @@ def ml_features():
 
 @app.route('/api/v1/ml/training-data', methods=['GET'])
 def ml_training_data():
-    """
-    ML Training Dataset
-    ---
-    tags:
-      - ML
-    responses:
-      200:
-        description: Training data for ML
-    """
+    logging.info("Rota '/api/v1/ml/training-data' acessada.")
     if books_df.empty:
         return jsonify({"error": "No data available"}), 404
     df = books_df.copy()
@@ -382,46 +245,15 @@ def ml_training_data():
 @app.route('/api/v1/ml/predictions', methods=['POST'])
 @jwt_required()
 def ml_predictions():
-    """
-    ML Predictions (JWT protected)
-    ---
-    tags:
-      - ML
-    security:
-      - Bearer: []
-    parameters:
-      - name: features
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            price:
-              type: number
-              example: 25.0
-            category_code:
-              type: integer
-              example: 3
-            rating_num:
-              type: integer
-              example: 4
-    responses:
-      200:
-        description: Predicted value
-        schema:
-          type: object
-          properties:
-            predicted_price:
-              type: number
-              example: 42.0
-      401:
-        description: Unauthorized, missing or invalid token
-    """
+    current_user = get_jwt_identity()
+    logging.info(f"Rota '/api/v1/ml/predictions' acessada por {current_user}.")
     data = request.get_json()
+    # Placeholder: implementar modelo real futuramente
     prediction = {"predicted_price": 42.0}
     return jsonify(prediction)
 
 # ===== Execução local =====
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+    logging.info(f"API rodando localmente na porta {port}.")
     app.run(host="0.0.0.0", port=port)
