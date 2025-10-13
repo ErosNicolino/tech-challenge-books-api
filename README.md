@@ -4,7 +4,7 @@
 
 Este projeto é parte do **Tech Challenge** e consiste em uma **API RESTful em Flask** que fornece dados de livros extraídos do site [Books to Scrape](https://books.toscrape.com/).
 
-A API é projetada para ser escalável e pronta para consumo por cientistas de dados, sistemas de recomendação de livros ou aplicações web. Possui endpoints para listar, buscar e consultar detalhes de livros, bem como listar categorias e verificar a saúde da API.
+A API é projetada para ser escalável e pronta para consumo por cientistas de dados, sistemas de recomendação de livros ou aplicações web. Possui endpoints para listar, buscar e consultar detalhes de livros, listar categorias, verificar a saúde da API e endpoints ML-ready com autenticação JWT.
 
 ---
 
@@ -34,8 +34,6 @@ tech-challenge-books-api/
 ---
 
 ## Diagrama do Pipeline
-
-O diagrama abaixo mostra o fluxo completo do projeto, desde a extração dos dados até o consumo pela API e possíveis modelos de Machine Learning:
 
 ![Diagrama do Pipeline](./docs/diagrama-visual.png)
 
@@ -88,59 +86,57 @@ A API estará disponível em **[http://127.0.0.1:5000/](http://127.0.0.1:5000/)*
 
 ## Deploy Público
 
-A API está hospedada no Render:
-[https://tech-challenge-books-api-mkqn.onrender.com](https://tech-challenge-books-api-mkqn.onrender.com)
+[Render Deployment](https://tech-challenge-books-api-mkqn.onrender.com)
 
 ---
 
 ## Documentação Interativa (Swagger)
 
-A documentação interativa da API pode ser acessada aqui:
-[https://tech-challenge-books-api-mkqn.onrender.com/apidocs](https://tech-challenge-books-api-mkqn.onrender.com/apidocs)
+[Swagger UI](https://tech-challenge-books-api-mkqn.onrender.com/apidocs)
 
 ---
 
 ## Endpoints da API
 
-### 1. Página inicial
+### Autenticação JWT
+
+#### Login
 
 ```http
-GET /
+POST /api/v1/auth/login
 ```
 
-Retorna a página inicial da API.
+**Request Body:**
 
-### 2. Informações gerais da API
-
-```http
-GET /api/v1
+```json
+{
+  "username": "admin",
+  "password": "password123"
+}
 ```
 
 **Response:**
 
 ```json
 {
-  "message": "API Books Tech Challenge is running!",
-  "endpoints": {
-    "/api/v1/books": "List all books",
-    "/api/v1/books/<id>": "Get book details by ID",
-    "/api/v1/books/search": "Search books by title and/or category",
-    "/api/v1/categories": "List all categories",
-    "/api/v1/health": "API health check"
-  }
+  "access_token": "seu_token_jwt_aqui"
 }
 ```
 
-### 3. Listar todos os livros
+---
+
+### Core Endpoints
+
+#### Listar todos os livros
 
 ```http
 GET /api/v1/books
 ```
 
-**Query Params:**
+**Query Params (opcional):**
 
-* `page` (opcional): número da página para paginação
-* `limit` (opcional): quantidade de livros por página
+* `page` → número da página
+* `limit` → quantidade de livros por página
 
 **Exemplo de Request:**
 
@@ -168,20 +164,11 @@ curl -X GET "https://tech-challenge-books-api-mkqn.onrender.com/api/v1/books?pag
 }
 ```
 
-**Status Codes:**
-
-* 200: sucesso
-* 400: parâmetros inválidos
-
-### 4. Detalhes de um livro
+#### Detalhes de um livro
 
 ```http
 GET /api/v1/books/<id>
 ```
-
-**Path Params:**
-
-* `id` (obrigatório): ID do livro
 
 **Exemplo de Request:**
 
@@ -204,21 +191,11 @@ curl -X GET "https://tech-challenge-books-api-mkqn.onrender.com/api/v1/books/1"
 }
 ```
 
-**Status Codes:**
-
-* 200: sucesso
-* 404: livro não encontrado
-
-### 5. Buscar livros
+#### Buscar livros
 
 ```http
 GET /api/v1/books/search?title=<title>&category=<category>
 ```
-
-**Query Params:**
-
-* `title` (opcional): título parcial do livro
-* `category` (opcional): categoria do livro
 
 **Exemplo de Request:**
 
@@ -242,12 +219,7 @@ curl -X GET "https://tech-challenge-books-api-mkqn.onrender.com/api/v1/books/sea
 ]
 ```
 
-**Status Codes:**
-
-* 200: sucesso
-* 404: nenhum livro encontrado
-
-### 6. Listar categorias
+#### Listar categorias
 
 ```http
 GET /api/v1/categories
@@ -264,11 +236,7 @@ GET /api/v1/categories
 ]
 ```
 
-**Status Codes:**
-
-* 200: sucesso
-
-### 7. Health Check
+#### Health Check
 
 ```http
 GET /api/v1/health
@@ -283,22 +251,140 @@ GET /api/v1/health
 }
 ```
 
-**Status Codes:**
+---
 
-* 200: API funcionando
-* 500: erro interno da API
+### Endpoints Insights / Estatísticas
+
+#### Estatísticas gerais
+
+```http
+GET /api/v1/stats/overview
+```
+
+**Exemplo de Response:**
+
+```json
+{
+  "total_books": 1000,
+  "average_price": 45.3,
+  "rating_distribution": {"Three": 300, "Four": 250, "Two": 200, "Five": 150, "One": 100}
+}
+```
+
+#### Estatísticas por categoria
+
+```http
+GET /api/v1/stats/categories
+```
+
+**Exemplo de Response:**
+
+```json
+{
+  "Poetry": {"books_count": 150, "average_price": 47.2},
+  "Science": {"books_count": 120, "average_price": 39.5}
+}
+```
+
+#### Top rated books
+
+```http
+GET /api/v1/books/top-rated
+```
+
+**Exemplo de Response:**
+
+```json
+[
+  {"id": 23, "title": "Best Book", "rating": "Five", "price": "60.0"}
+]
+```
+
+#### Books by price range
+
+```http
+GET /api/v1/books/price-range?min=20&max=50
+```
+
+**Exemplo de Response:**
+
+```json
+[
+  {"id": 10, "title": "Affordable Book", "price": "45.0"}
+]
+```
+
+---
+
+### Endpoints ML-ready
+
+#### Features
+
+```http
+GET /api/v1/ml/features
+```
+
+**Exemplo de Response:**
+
+```json
+[
+  {"price": 45.17, "rating_num": 2, "category_code": 47}
+]
+```
+
+#### Training Data
+
+```http
+GET /api/v1/ml/training-data
+```
+
+**Exemplo de Response:**
+
+```json
+[
+  {"price": 45.17, "category_code": 47, "rating_num": 2}
+]
+```
+
+#### Predictions (JWT protected)
+
+```http
+POST /api/v1/ml/predictions
+```
+
+**Header:**
+
+```
+Authorization: Bearer <seu_token_jwt>
+```
+
+**Body JSON:**
+
+```json
+{
+  "price": 25.0,
+  "category_code": 3,
+  "rating_num": 4
+}
+```
+
+**Exemplo de Response:**
+
+```json
+{
+  "predicted_price": 42.0
+}
+```
 
 ---
 
 ## Atualizando os Dados
 
-Para atualizar o CSV de livros:
-
 ```bash
 python scripts/scrape_books.py
 ```
 
-Depois, reinicie a API localmente ou faça push para o Render:
+Depois:
 
 ```bash
 git add data/books.csv
@@ -310,8 +396,6 @@ git push origin main
 
 ## Testes
 
-Para rodar os testes unitários:
-
 ```bash
 pytest
 ```
@@ -320,29 +404,22 @@ pytest
 
 ## Contribuição
 
-Contribuições são bem-vindas:
-
-1. Faça um fork do projeto
-2. Crie uma branch (`git checkout -b minha-feature`)
-3. Commit suas mudanças (`git commit -m "Minha feature"`)
-4. Push para a branch (`git push origin minha-feature`)
-5. Abra um Pull Request
+1. Fork do projeto
+2. Criar branch feature: `git checkout -b minha-feature`
+3. Commitar alterações: `git commit -m "Minha feature"`
+4. Push para o branch: `git push origin minha-feature`
+5. Abrir Pull Request
 
 ---
 
 ## Licença
 
-Este projeto está licenciado sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para mais informações.
+Este projeto está licenciado sob a MIT License. Consulte o arquivo `LICENSE` para mais detalhes.
 
 ---
 
 ## Vídeo de Apresentação
 
-* Duração sugerida: 3–12 minutos
-* Mostrar a API rodando online (link Render)
-* Demonstrar alguns endpoints funcionando e o Swagger
-* Explicar a arquitetura do pipeline e boas práticas
-* Hospedar no YouTube ou Google Drive e adicionar o link aqui
+Em andamento...
 
-> **Link de vídeo:**
-> Em andamento...
+
