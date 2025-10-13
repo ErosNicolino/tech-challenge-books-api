@@ -19,9 +19,9 @@ swagger = Swagger(app, template={
         },
         "termsOfService": "https://books.toscrape.com/",
     },
-    "host": "localhost:5000",  # altere para seu domínio do Heroku após deploy
+    "host": "tech-challenge-books-api-mkqn.onrender.com", 
     "basePath": "/", 
-    "schemes": ["http", "https"]
+    "schemes": ["https"] 
 })
 
 # ===== Página inicial (HTML) =====
@@ -191,7 +191,7 @@ def health():
     """
     return jsonify({"status": "ok", "books_count": len(books_df)})
 
-# ===== Execução local e no Heroku =====
+# ===== Execução local =====
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
