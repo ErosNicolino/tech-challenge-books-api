@@ -1,13 +1,12 @@
 # Tech Challenge - API Books
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)  
-[![Flask](https://img.shields.io/badge/Flask-2.x-green.svg)](https://flask.palletsprojects.com/)  
-[![Heroku](https://img.shields.io/badge/Deploy-Heroku-purple.svg)](https://tech-challenge-books-api-162d6be10e8a.herokuapp.com)  
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.x-green.svg)](https://flask.palletsprojects.com/)
 
 ## Descrição do Projeto
-Este projeto faz parte do **Tech Challenge** e consiste em uma **API RESTful em Flask** que disponibiliza dados de livros extraídos do site [Books to Scrape](https://books.toscrape.com/).  
+Este projeto é parte do **Tech Challenge** e consiste em uma **API RESTful em Flask** que fornece dados de livros extraídos do site [Books to Scrape](https://books.toscrape.com/).  
 
-O objetivo é fornecer uma API escalável e pronta para consumo por cientistas de dados ou sistemas de recomendação de livros.
+A API é projetada para ser escalável e pronta para consumo por cientistas de dados ou sistemas de recomendação de livros. Possui endpoints para listar, buscar e consultar detalhes de livros, bem como listar categorias e verificar a saúde da API.
 
 ---
 
@@ -19,16 +18,13 @@ tech-challenge-books-api/
 ├── api/
 │   └── app.py              # API Flask
 ├── templates/
-│   └── index.html          # Página Inicial
+│   └── index.html          # Página inicial
 ├── static/
 │   └── style.css           # CSS da interface
-├── scripts/
-│   └── scrape_books.py     # Web scraping para gerar CSV
 ├── data/
-│   └── books.csv           # CSV com os livros
-├── tests/                  # Testes unitários
+│   └── books.csv           # CSV com dados dos livros
 ├── requirements.txt        # Dependências do projeto
-├── Procfile                # Para deploy no Heroku
+├── Procfile                # Para deploy no Render
 └── README.md               # Este arquivo
 ```
 
@@ -36,9 +32,9 @@ tech-challenge-books-api/
 
 ## Pré-requisitos
 
-- Python **3.10+**  
+- Python 3.10+  
 - [Git](https://git-scm.com/)  
-- [pip](https://pip.pypa.io/)  
+- [pip](https://pip.pypa.io/en/stable/)  
 
 ---
 
@@ -46,7 +42,7 @@ tech-challenge-books-api/
 
 1. **Clone o repositório:**
 ```bash
-git clone <seu-repo-url>
+git clone https://github.com/ErosNicolino/tech-challenge-books-api.git
 cd tech-challenge-books-api
 ```
 
@@ -75,11 +71,33 @@ A API estará disponível em **http://127.0.0.1:5000/**.
 
 ---
 
+## Deploy Público
+
+A API está hospedada no Render:  
+[https://tech-challenge-books-api-mkqn.onrender.com](https://tech-challenge-books-api-mkqn.onrender.com)
+
+---
+
+## Documentação Interativa (Swagger)
+
+A documentação interativa da API pode ser acessada aqui:  
+[https://tech-challenge-books-api-mkqn.onrender.com/apidocs](https://tech-challenge-books-api-mkqn.onrender.com/apidocs)
+
+---
+
 ## Endpoints da API
 
-### Rota raiz
+### 1. Rota raiz
 ```http
 GET /
+```
+Retorna a página inicial da API.
+
+---
+
+### 2. Informações da API
+```http
+GET /api/v1
 ```
 **Response:**
 ```json
@@ -95,40 +113,46 @@ GET /
 }
 ```
 
-### Listar todos os livros
+---
+
+### 3. Listar todos os livros
 ```http
 GET /api/v1/books
 ```
-Exemplo:  
-[https://tech-challenger-fiap-a3208a7afd55.herokuapp.com/api/v1/books](https://tech-challenger-fiap-a3208a7afd55.herokuapp.com/api/v1/books)
+Retorna todos os livros da base de dados.
 
 ---
 
-### Detalhes de um livro
+### 4. Detalhes de um livro
 ```http
 GET /api/v1/books/<id>
 ```
+Retorna os detalhes de um livro específico pelo ID.
 
 ---
 
-### Buscar livros por título ou categoria
+### 5. Buscar livros
 ```http
 GET /api/v1/books/search?title=<title>&category=<category>
 ```
+Permite buscar livros por título e/ou categoria.
 
 ---
 
-### Listar todas as categorias
+### 6. Listar categorias
 ```http
 GET /api/v1/categories
 ```
+Retorna todas as categorias de livros disponíveis.
 
 ---
 
-### Health Check
+### 7. Health Check
 ```http
 GET /api/v1/health
 ```
+Verifica o status da API e retorna a quantidade total de livros.
+
 **Response:**
 ```json
 {
@@ -141,18 +165,18 @@ GET /api/v1/health
 
 ## Atualizando os Dados
 
-Execute o script de scraping:
+Para atualizar o CSV de livros:
+
 ```bash
 python scripts/scrape_books.py
 ```
 
-Isso irá atualizar o arquivo `data/books.csv` com os dados mais recentes.  
-Depois, reinicie a API localmente ou faça push para o Heroku:
+Depois, reinicie a API localmente ou faça push para o Render:
 
 ```bash
 git add data/books.csv
 git commit -m "Update books data"
-git push heroku main
+git push origin main
 ```
 
 ---
@@ -160,22 +184,17 @@ git push heroku main
 ## Testes
 
 Para rodar os testes unitários:
+
 ```bash
 pytest
 ```
 
 ---
 
-## Deploy Público
-
-A API está disponível no Heroku:  
-🔗 [https://tech-challenger-fiap-a3208a7afd55.herokuapp.com](https://tech-challenger-fiap-a3208a7afd55.herokuapp.com)
-
----
-
 ## Contribuição
 
-Contribuições são bem-vindas!  
+Contribuições são bem-vindas:
+
 1. Faça um fork do projeto  
 2. Crie uma branch (`git checkout -b minha-feature`)  
 3. Commit suas mudanças (`git commit -m "Minha feature"`)  
@@ -186,4 +205,4 @@ Contribuições são bem-vindas!
 
 ## Licença
 
-Este projeto está licenciado sob a licença **MIT** – veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está licenciado sob a licença **MIT** – veja o arquivo [LICENSE](LICENSE) para mais detal
