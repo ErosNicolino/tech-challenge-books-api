@@ -2,11 +2,12 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.x-green.svg)](https://flask.palletsprojects.com/)
+[![Deploy](https://img.shields.io/badge/Deploy-Render-purple.svg)](https://tech-challenge-books-api-mkqn.onrender.com)
 
 ## Descrição do Projeto
 Este projeto é parte do **Tech Challenge** e consiste em uma **API RESTful em Flask** que fornece dados de livros extraídos do site [Books to Scrape](https://books.toscrape.com/).  
 
-A API é projetada para ser escalável e pronta para consumo por cientistas de dados ou sistemas de recomendação de livros. Possui endpoints para listar, buscar e consultar detalhes de livros, bem como listar categorias e verificar a saúde da API.
+A API é projetada para ser escalável e pronta para consumo por cientistas de dados, sistemas de recomendação de livros ou aplicações web. Possui endpoints para listar, buscar e consultar detalhes de livros, bem como listar categorias e verificar a saúde da API.
 
 ---
 
@@ -15,17 +16,21 @@ A API é projetada para ser escalável e pronta para consumo por cientistas de d
 ```
 tech-challenge-books-api/
 │
+├── .venv/                  # Ambiente virtual (não versionar)
 ├── api/
-│   └── app.py              # API Flask
-├── templates/
-│   └── index.html          # Página inicial
-├── static/
-│   └── style.css           # CSS da interface
+│   └── app.py              # API Flask principal
 ├── data/
-│   └── books.csv           # CSV com dados dos livros
+│   └── books.csv           # CSV com dados coletados
+├── scripts/
+│   └── scrape_books.py     # Script de web scraping
+├── static/
+│   └── style.css           # Arquivos estáticos da interface
+├── templates/
+│   └── index.html          # Página inicial da API
+├── tests/                  # Testes unitários (opcional)
 ├── requirements.txt        # Dependências do projeto
-├── Procfile                # Para deploy no Render
-└── README.md               # Este arquivo
+├── Procfile                # Configuração para deploy no Render
+└── README.md               # Documentação do projeto
 ```
 
 ---
@@ -38,15 +43,15 @@ tech-challenge-books-api/
 
 ---
 
-## Rodando Localmente
+## Instalação e Execução Local
 
-1. **Clone o repositório:**
+1. **Clonar o repositório:**
 ```bash
 git clone https://github.com/ErosNicolino/tech-challenge-books-api.git
 cd tech-challenge-books-api
 ```
 
-2. **Crie e ative o ambiente virtual:**
+2. **Criar e ativar o ambiente virtual:**
 ```bash
 python -m venv .venv
 
@@ -57,12 +62,12 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-3. **Instale as dependências:**
+3. **Instalar dependências:**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Rode a API:**
+4. **Executar a API:**
 ```bash
 python api/app.py
 ```
@@ -87,7 +92,7 @@ A documentação interativa da API pode ser acessada aqui:
 
 ## Endpoints da API
 
-### 1. Rota raiz
+### 1. Página inicial
 ```http
 GET /
 ```
@@ -95,7 +100,7 @@ Retorna a página inicial da API.
 
 ---
 
-### 2. Informações da API
+### 2. Informações gerais da API
 ```http
 GET /api/v1
 ```
@@ -205,4 +210,18 @@ Contribuições são bem-vindas:
 
 ## Licença
 
-Este projeto está licenciado sob a licença **MIT** – veja o arquivo [LICENSE](LICENSE) para mais detal
+Este projeto está licenciado sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para mais informações.
+
+---
+
+## Vídeo de Apresentação
+
+- Duração sugerida: 3–12 minutos  
+- Mostrar a API rodando online (link Render)  
+- Demonstrar alguns endpoints funcionando e o Swagger  
+- Explicar a arquitetura do pipeline e boas práticas  
+- Hospedar no YouTube ou Google Drive e adicionar o link aqui  
+
+> **Exemplo de link de vídeo:**  
+> [Apresentação Tech Challenge - API Books](#)
+
