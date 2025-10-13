@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,30 +8,86 @@
 </head>
 <body>
     <div class="container">
-        <h1>API Books Tech Challenge</h1>
-        <p>Bem-vindo(a)! Acesse os endpoints da API abaixo:</p>
+        <header>
+            <h1>API Books Tech Challenge</h1>
+            <p class="subtitle">Access and explore API endpoints for data, insights, and ML-ready features.</p>
+        </header>
 
-        <h2>Endpoints</h2>
-        <ul class="endpoints">
-            <li><a href="/api/v1/books">/api/v1/books</a> - Lista todos os livros</li>
-            <li><a href="/api/v1/books/1">/api/v1/books/&lt;id&gt;</a> - Detalhes de um livro</li>
-            <li><a href="/api/v1/books/search?title=&lt;título&gt;&category=&lt;categoria&gt;">/api/v1/books/search</a> - Buscar livros por título e/ou categoria</li>
-            <li><a href="/api/v1/categories">/api/v1/categories</a> - Lista todas as categorias</li>
-            <li><a href="/api/v1/health">/api/v1/health</a> - Health check da API</li>
-        </ul>
+        <section class="cards-section">
+            <h2>Core Endpoints</h2>
+            <div class="cards">
+                <a class="card" href="/api/v1/books">
+                    <h3>/api/v1/books</h3>
+                    <p>List all books</p>
+                </a>
+                <a class="card" href="/api/v1/books/1">
+                    <h3>/api/v1/books/&lt;id&gt;</h3>
+                    <p>Get details of a specific book</p>
+                </a>
+                <a class="card" href="/api/v1/books/search?title=&lt;title&gt;&category=&lt;category&gt;">
+                    <h3>/api/v1/books/search</h3>
+                    <p>Search books by title and/or category</p>
+                </a>
+                <a class="card" href="/api/v1/categories">
+                    <h3>/api/v1/categories</h3>
+                    <p>List all categories</p>
+                </a>
+                <a class="card" href="/api/v1/health">
+                    <h3>/api/v1/health</h3>
+                    <p>Check API health</p>
+                </a>
+            </div>
+        </section>
 
-        <h2>Sobre</h2>
-        <p>Esta API é parte do Tech Challenge e fornece dados de livros extraídos do site 
-        <a href="https://books.toscrape.com/" target="_blank">Books to Scrape</a>. 
-        Pode ser utilizada para aplicações de ciência de dados, recomendações de livros ou consumo geral de dados.</p>
+        <section class="cards-section">
+            <h2>Insights Endpoints</h2>
+            <div class="cards">
+                <a class="card" href="/api/v1/stats/overview">
+                    <h3>/api/v1/stats/overview</h3>
+                    <p>General statistics of the collection</p>
+                </a>
+                <a class="card" href="/api/v1/stats/categories">
+                    <h3>/api/v1/stats/categories</h3>
+                    <p>Statistics by category</p>
+                </a>
+                <a class="card" href="/api/v1/books/top-rated">
+                    <h3>/api/v1/books/top-rated</h3>
+                    <p>Top 10 rated books</p>
+                </a>
+                <a class="card" href="/api/v1/books/price-range?min=10&max=50">
+                    <h3>/api/v1/books/price-range</h3>
+                    <p>Filter books by price range</p>
+                </a>
+            </div>
+        </section>
 
-        <h2>Atualização de dados</h2>
-        <p>Para atualizar os dados, execute o script de scraping:</p>
-        <code>python scripts/scrape_books.py</code>
-        <p>Depois, reinicie a API ou faça push para o Heroku.</p>
+        <section class="cards-section">
+            <h2>ML-Ready Endpoints</h2>
+            <div class="cards">
+                <a class="card" href="/api/v1/ml/features">
+                    <h3>/api/v1/ml/features</h3>
+                    <p>Features prepared for ML models</p>
+                </a>
+                <a class="card" href="/api/v1/ml/training-data">
+                    <h3>/api/v1/ml/training-data</h3>
+                    <p>Training dataset with features and target</p>
+                </a>
+                <a class="card" href="#" onclick="alert('Use POST /api/v1/ml/predictions via Postman or curl')">
+                    <h3>/api/v1/ml/predictions</h3>
+                    <p>Receive features and return prediction (POST)</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="update-section">
+            <h2>Data Update</h2>
+            <p>Run the scraping script to update the dataset:</p>
+            <code>python scripts/scrape_books.py</code>
+            <p>Then restart the API or push to Render.</p>
+        </section>
 
         <footer>
-            Tech Challenge - API Books &copy; 2025
+            FIAP Tech Challenge - API Books &copy; 2025
         </footer>
     </div>
 </body>
