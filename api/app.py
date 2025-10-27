@@ -177,12 +177,17 @@ def trigger_scraping():
     """
     current_user = get_jwt_identity()
     logging.info(f"Rota '/api/v1/scraping/trigger' acessada por {current_user}.")
+
     try:
-        subprocess.run(["python", "scripts/scrape_books.py"], check=True)
+        from scripts.scrape_books import scrape_books, save_to_csv
+
+        books = scrape_books()
+        save_to_csv(books)
+
         logging.info("Scraping concluído com sucesso.")
         return jsonify({"msg": "Scraping concluído com sucesso."})
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Erro no scraping: {e}")
+    except Exception as e:
+        logging.error(f"Erro no scraping: {e}", exc_info=True)
         return jsonify({"error": "Falha ao executar scraping"}), 500
 
 # ===== Core Endpoints =====
@@ -477,7 +482,7 @@ def ml_predictions():
     current_user = get_jwt_identity()
     logging.info(f"Rota '/api/v1/ml/predictions' acessada por {current_user}.")
     data = request.get_json()
-    prediction = {"predicted_price": 42.0}  # Placeholder
+    prediction = {"predicted_price": 42.0}
     return jsonify(prediction)
 
 # ===== Execução local =====

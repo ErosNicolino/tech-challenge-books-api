@@ -34,7 +34,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 
-
 # ===== Funções de scraping =====
 def get_soup(url: str) -> BeautifulSoup:
     """
@@ -49,7 +48,6 @@ def get_soup(url: str) -> BeautifulSoup:
     response = requests.get(url)
     response.raise_for_status()
     return BeautifulSoup(response.text, "lxml")
-
 
 def parse_book(article: BeautifulSoup, category: str) -> Dict[str, str]:
     """
@@ -77,7 +75,6 @@ def parse_book(article: BeautifulSoup, category: str) -> Dict[str, str]:
         "image_url": image_url
     }
 
-
 def scrape_category(category_url: str, category_name: str) -> List[Dict[str, str]]:
     """
     Coleta todos os livros de uma categoria, incluindo paginação.
@@ -100,7 +97,6 @@ def scrape_category(category_url: str, category_name: str) -> List[Dict[str, str
         for article in articles:
             books.append(parse_book(article, category_name))
 
-        # Verifica se há próxima página
         next_btn = soup.select_one("li.next > a")
         if next_btn:
             page_url = category_url.replace("index.html", next_btn["href"])
@@ -110,7 +106,6 @@ def scrape_category(category_url: str, category_name: str) -> List[Dict[str, str
         time.sleep(DELAY_BETWEEN_REQUESTS)
 
     return books
-
 
 def scrape_books() -> List[Dict[str, str]]:
     """
@@ -132,7 +127,6 @@ def scrape_books() -> List[Dict[str, str]]:
     logging.info(f"Total de livros coletados: {len(all_books)}")
     return all_books
 
-
 def save_to_csv(books: List[Dict[str, str]], filepath: str = CSV_FILEPATH) -> None:
     """
     Salva os livros coletados em um arquivo CSV.
@@ -152,7 +146,6 @@ def save_to_csv(books: List[Dict[str, str]], filepath: str = CSV_FILEPATH) -> No
         writer.writerows(books)
 
     logging.info(f"Arquivo CSV salvo em {filepath}")
-
 
 # ===== Execução principal =====
 if __name__ == "__main__":
