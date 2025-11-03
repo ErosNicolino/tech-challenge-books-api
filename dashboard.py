@@ -13,11 +13,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ===== Branding FIAP =====
-PRIMARY_COLOR = "#FF004D"   # Vermelho neon
-SECONDARY_COLOR = "#2B2B2B" # Cinza escuro
-TEXT_COLOR = "#FFFFFF"      # Branco para textos fora dos gráficos
-GRAPH_TEXT_COLOR = "#000000" # Preto dentro dos gráficos
+# ===== Branding =====
+PRIMARY_COLOR = "#FF004D"   
+SECONDARY_COLOR = "#2B2B2B" 
+TEXT_COLOR = "#FFFFFF"      
+GRAPH_TEXT_COLOR = "#000000" 
 
 st.markdown(f"""
 <style>
@@ -29,7 +29,7 @@ st.markdown(f"""
     /* Títulos, subtítulos e textos gerais */
     h1, h2, h3, h4, .stMarkdown p {{
         color: {TEXT_COLOR};
-    }}
+    }}]
     /* Textos das tabelas Streamlit */
     .stDataFrame div {{
         color: {TEXT_COLOR};
