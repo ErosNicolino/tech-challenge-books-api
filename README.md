@@ -35,7 +35,6 @@ tech-challenge-books-api/
 ├── docs/
 │   └── diagrama-visual.png # Diagrama do pipeline e arquitetura
 ├── dashboard.py            # Dashboard Streamlit
-├── tests/                  # Testes unitários
 ├── requirements.txt        # Dependências do projeto
 └── README.md               # Documentação do projeto
 ```
@@ -227,14 +226,6 @@ git push origin main
 
 ---
 
-## Testes
-
-```bash
-pytest
-```
-
----
-
 ## Dashboard
 
 * Visualiza métricas gerais, distribuições, top 10 livros por preço e rating.
@@ -261,4 +252,4 @@ MIT License. Consulte o arquivo `LICENSE`.
 
 ## Vídeo de Apresentação
 
-Em andamento – será adicionado link do vídeo com demonstração de chamadas reais à API, dashboard e arquitetura.
+(https://youtu.be/AcgiUJrlnTA)
